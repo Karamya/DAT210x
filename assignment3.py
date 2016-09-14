@@ -37,5 +37,5 @@ print(y.vgain.mean())                 #print(df[df.pgain ==4].describe())  or pr
 # TODO: (Bonus) See what happens when you run
 # the .dtypes method on your dataframe!
 
-
+print(df.dtypes)
 
