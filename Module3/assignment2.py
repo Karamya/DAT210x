@@ -1,25 +1,47 @@
 import pandas as pd
-import os
-# TODO: Load up the 'tutorial.csv' dataset
+import matplotlib.pyplot as plt
+import matplotlib
+
+# Look pretty...
+matplotlib.style.use('ggplot')
+
+
 #
+# TODO: Load up the Seeds Dataset into a Dataframe
+# It's located at 'Datasets/wheat.data'
+# 
 # .. your code here ..
 
-os.chdir('D:\Data analysis\data\DAT210x\Module2\Datasets')
-df = pd.read_csv('tutorial.csv')
 
-# TODO: Print the results of the .describe() method
 #
-# .. your code here ..
-print(df)
-print(df.describe())
-
-# TODO: Figure out which indexing method you need to
-# use in order to index your dataframe with: [2:4,'col3']
-# And print the results
-#
+# TODO: Create a 2d scatter plot that graphs the
+# area and perimeter features
+# 
 # .. your code here ..
 
-print(df.loc[2:4, 'col3'])
 
+#
+# TODO: Create a 2d scatter plot that graphs the
+# groove and asymmetry features
+# 
+# .. your code here ..
+
+
+#
+# TODO: Create a 2d scatter plot that graphs the
+# compactness and width features
+# 
+# .. your code here ..
+
+
+
+# BONUS TODO:
+# After completing the above, go ahead and run your program
+# Check out the results, and see what happens when you add
+# in the optional display parameter marker with values of
+# either '^', '.', or 'o'.
+
+
+plt.show()
 
 

@@ -1,42 +1,42 @@
 import pandas as pd
-import os
-# TODO: Load up the dataset
-# Ensuring you set the appropriate header column names
-#
-# .. your code here ..
-os.chdir('D:/Data analysis/data/DAT210x/Module2/Datasets/')
+import matplotlib.pyplot as plt
+import matplotlib
+from mpl_toolkits.mplot3d import Axes3D
 
-df = pd.read_csv('servo.data', names =['motor', 'screw', 'pgain', 'vgain', 'class'])
-#print(df)
-# TODO: Create a slice that contains all entries
-# having a vgain equal to 5. Then print the 
-# length of (# of samples in) that slice:
-#
-# .. your code here ..
-print(len(df[df.vgain == 5]))
+# Look pretty...
+matplotlib.style.use('ggplot')
 
-# TODO: Create a slice that contains all entries
-# having a motor equal to E and screw equal
-# to E. Then print the length of (# of
-# samples in) that slice:
+
 #
+# TODO: Load up the Seeds Dataset into a Dataframe
+# It's located at 'Datasets/wheat.data'
+# 
 # .. your code here ..
 
-print(len(df[(df.motor == 'E') & (df.screw == 'E')]))
 
-# TODO: Create a slice that contains all entries
-# having a pgain equal to 4. Use one of the
-# various methods of finding the mean vgain
-# value for the samples in that slice. Once
-# you've found it, print it:
+
+fig = plt.figure()
 #
+# TODO: Create a new 3D subplot using fig. Then use the
+# subplot to graph a 3D scatter plot using the area,
+# perimeter and asymmetry features. Be sure to use the
+# optional display parameter c='red', and also label your
+# axes
+# 
 # .. your code here ..
-y = df[df.pgain ==4]
-print(y.vgain.mean())                 #print(df[df.pgain ==4].describe())  or print(df[df.pgain ==4].vgain.mean())
-
-# TODO: (Bonus) See what happens when you run
-# the .dtypes method on your dataframe!
 
 
+fig = plt.figure()
+#
+# TODO: Create a new 3D subplot using fig. Then use the
+# subplot to graph a 3D scatter plot using the width,
+# groove and length features. Be sure to use the
+# optional display parameter c='green', and also label your
+# axes
+# 
+# .. your code here ..
 
-print(df.dtypes)
+
+plt.show()
+
+
