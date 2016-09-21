@@ -2,10 +2,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
 import datetime
-
+import os
 from mpl_toolkits.mplot3d import Axes3D
 from plyfile import PlyData, PlyElement
-
+from sklearn.decomposition import PCA, RandomizedPCA
 
 # Every 100 data samples, we save 1. If things run too
 # slow, try increasing this number. If things run too fast,
@@ -15,10 +15,10 @@ reduce_factor = 100
 
 # Look pretty...
 matplotlib.style.use('ggplot')
-
+os.chdir('D:/Data analysis/data/DAT210x/Module4/Datasets')
 
 # Load up the scanned armadillo
-plyfile = PlyData.read('Datasets/stanford_armadillo.ply')
+plyfile = PlyData.read('stanford_armadillo.ply')
 armadillo = pd.DataFrame({
   'x':plyfile['vertex']['z'][::reduce_factor],
   'y':plyfile['vertex']['x'][::reduce_factor],
@@ -40,8 +40,11 @@ def do_PCA(armadillo):
   # you automatically. =)
   #
   # .. your code here ..
+    pca = PCA(n_components = 2)
+    pca.fit(armadillo)
+    pca_transformed = pca.transform(armadillo)
 
-  return None
+    return pca_transformed
 
 
 def do_RandomizedPCA(armadillo):
@@ -58,8 +61,11 @@ def do_RandomizedPCA(armadillo):
   # you automatically. =)
   #
   # .. your code here ..
-
-  return None
+    #from sklearn.decomposition import RandomizedPCA
+    rpca = RandomizedPCA(n_components = 2)
+    rpca.fit(armadillo)
+    rpca_transformed = rpca.transform(armadillo)
+    return rpca_transformed
 
 
 
@@ -89,7 +95,7 @@ if not pca is None:
 
 
 # Time the execution of rPCA 5000x
-t1 = datetime.datetime.now()
+t1w = datetime.datetime.now()
 for i in range(5000): rpca = do_RandomizedPCA(armadillo)
 time_delta = datetime.datetime.now() - t1
 
