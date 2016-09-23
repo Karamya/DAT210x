@@ -2,8 +2,11 @@ import pandas as pd
 from datetime import timedelta
 import matplotlib.pyplot as plt
 import matplotlib
-
+import os
 matplotlib.style.use('ggplot') # Look Pretty
+from sklearn.cluster import KMeans
+
+os.chdir('D:/Data analysis/data/DAT210x/Module5/Datasets')
 
 #
 # INFO: This dataset has call records for 10 users tracked over the course of 3 years.
@@ -12,32 +15,36 @@ matplotlib.style.use('ggplot') # Look Pretty
 
 
 def showandtell(title=None):
-  if title != None: plt.savefig(title + ".png", bbox_inches='tight', dpi=300)
-  plt.show()
-  exit()
+    if title != None: plt.savefig(title + ".png", bbox_inches='tight', dpi=300)
+    plt.show()
+  #exit()
 
 def clusterInfo(model):
-  print "Cluster Analysis Inertia: ", model.inertia_
-  print '------------------------------------------'
-  for i in range(len(model.cluster_centers_)):
-    print "\n  Cluster ", i
-    print "    Centroid ", model.cluster_centers_[i]
-    print "    #Samples ", (model.labels_==i).sum() # NumPy Power
+    print ("Cluster Analysis Inertia: ", model.inertia_)
+    print ('------------------------------------------')
+    for i in range(len(model.cluster_centers_)):
+        print ("\n  Cluster ", i)
+        print ("    Centroid ", model.cluster_centers_[i])
+        print ("    #Samples ", (model.labels_==i).sum()) # NumPy Power
 
 # Find the cluster with the least # attached nodes
 def clusterWithFewestSamples(model):
   # Ensure there's at least on cluster...
-  minSamples = len(model.labels_)
-  minCluster = 0
-  for i in range(len(model.cluster_centers_)):
-    if minSamples > (model.labels_==i).sum():
-      minCluster = i
-      minSamples = (model.labels_==i).sum()
-  print "\n  Cluster With Fewest Samples: ", minCluster
-  return (model.labels_==minCluster)
+
+      minSamples = len(model.labels_)      
+      minCluster = 0      
+      for i in range(len(model.cluster_centers_)):
+          #print (minSamples)
+          #print(model.labels_ == i)
+          if minSamples > (model.labels_==i).sum():
+              minCluster = i
+              minSamples = (model.labels_==i).sum()
+      print ("\n  Cluster With Fewest Samples: ", minCluster)
+      return (model.labels_==minCluster)
 
 
-def doKMeans(data, clusters=0):
+
+def doKMeans(data, clusters = 0):
   #
   # TODO: Be sure to only feed in Lat and Lon coordinates to the KMeans algo, since none of the other
   # data is suitable for your purposes. Since both Lat and Lon are (approximately) on the same scale,
@@ -48,7 +55,20 @@ def doKMeans(data, clusters=0):
   # This is part of your domain expertise.
   #
   # .. your code here ..
-  return model
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.scatter(data.TowerLat, data.TowerLon, marker = 'o', alpha = 0.3)
+    
+    data = data[['TowerLat', 'TowerLon']]
+    #print(data)
+    model = KMeans(n_clusters = clusters)    
+    
+    model.fit_predict(data)
+    centroids = model.cluster_centers_
+    ax.scatter(centroids[:,0], centroids[:,1], marker = 'x', c = 'red', alpha = 0.5, linewidth = 3, s = 150)
+    ax.set_title('Centroid')
+    print(centroids)
+    return model
 
 
 
@@ -57,7 +77,10 @@ def doKMeans(data, clusters=0):
 # Convert the date using pd.to_datetime, and the time using pd.to_timedelta
 #
 # .. your code here ..
-
+df = pd.read_csv("CDR.csv")
+df.CallDate  = pd.to_datetime(df.CallDate)
+df.CallTime = pd.to_timedelta(df.CallTime)
+#print(df.head())
 
 
 
@@ -68,14 +91,15 @@ def doKMeans(data, clusters=0):
 # Hint: https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html
 #
 # .. your code here ..
-
+users = df.In.unique()   #planning to work with NDArray, so did not convert it into list
+#print(users)
 
 #
 # INFO: The locations map above should be too "busy" to really wrap your head around. This
 # is where domain expertise comes into play. Your intuition tells you that people are likely
 # to behave differently on weekends:
 #
-# On Weekdays:
+# On Weekends:
 #   1. People probably don't go into work
 #   2. They probably sleep in late on Saturday
 #   3. They probably run a bunch of random errands, since they couldn't during the week
@@ -89,19 +113,22 @@ def doKMeans(data, clusters=0):
 
 
 
-print "\n\nExamining person: ", 0
+print ("\n\nExamining person: ", 0)
 # 
 # TODO: Create a slice called user1 that filters to only include dataset records where the
 # "In" feature (user phone number) is equal to the first number on your unique list above
 #
 # .. your code here ..
-
+print(users)
+user1 = df[df.In == users[0]]
 
 #
 # TODO: Alter your slice so that it includes only Weekday (Mon-Fri) values.
 #
 # .. your code here ..
 
+user1 = user1[(user1.DOW != 'Sat') & (user1.DOW != 'Sun') ]
+#print(len(user1))
 
 #
 # TODO: The idea is that the call was placed before 5pm. From Midnight-730a, the user is
@@ -111,13 +138,20 @@ print "\n\nExamining person: ", 0
 #
 # .. your code here ..
 
+user1 = user1[(user1.CallTime > '07:30:00') & (user1.CallTime < '17:00:00')]
+#print(user1)
 
 #
 # TODO: Plot the Cell Towers the user connected to
 #
 # .. your code here ..
+#print(str(users[0]))
 
-
+fig = plt.figure(1)
+ax = fig.add_subplot(111)
+ax.scatter(user1.TowerLon, user1.TowerLat, c='g', marker='o', alpha=0.2)
+ax.set_title('Call Locations during week days for 0' + str(users[0]))
+showandtell()
 
 #
 # INFO: Run K-Means with K=3 or K=4. There really should only be a two areas of concentration. If you
@@ -127,7 +161,7 @@ print "\n\nExamining person: ", 0
 # on the user's approximate home location and work locations. Or rather the location of the cell
 # tower closest to them.....
 model = doKMeans(user1, 3)
-
+clusterInfo(model)
 
 #
 # INFO: Print out the mean CallTime value for the samples belonging to the cluster with the LEAST
@@ -137,7 +171,7 @@ model = doKMeans(user1, 3)
 # work, between the midnight and 5pm?
 midWayClusterIndices = clusterWithFewestSamples(model)
 midWaySamples = user1[midWayClusterIndices]
-print "    Its Waypoint Time: ", midWaySamples.CallTime.mean()
+print ("    Its Waypoint Time: ", midWaySamples.CallTime.mean())
 
 
 #
@@ -147,3 +181,34 @@ ax.scatter(model.cluster_centers_[:,1], model.cluster_centers_[:,0], s=169, c='r
 #
 # Then save the results:
 showandtell('Weekday Calls Centroids')  # Comment this line out when you're ready to proceed
+
+
+
+for i in range (len(users)):
+    print("\n\n-----------------------------------------")
+    print(" Analysis for user number 0" + str(users[i]))
+    print("-----------------------------------------\n")
+    user = df[df.In == users[i]]
+    user.plot.scatter(x='TowerLon', y='TowerLat', alpha=0.1, title=('Call Locations for ' +str(users[i])), s = 50)
+    user = user[(user.DOW != 'Sat') & (user.DOW != 'Sun') ]    
+    
+    user = user[(user.CallTime > '07:30:00') & (user.CallTime < '17:00:00')]
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.scatter(user.TowerLon, user.TowerLat, c='g', marker='o', alpha=0.2)
+    ax.set_title('Call Locations during week days for 0' + str(users[i]))
+
+    
+    model = doKMeans(user, 3)
+    clusterInfo(model)
+    
+    
+    
+    midWayClusterIndices = clusterWithFewestSamples(model)
+    midWaySamples = user[midWayClusterIndices]
+    print ("    Its Waypoint Time: ", midWaySamples.CallTime.mean())
+    ax.scatter(model.cluster_centers_[:,1], model.cluster_centers_[:,0], s=169, c='r', marker='x', alpha=0.8, linewidths=2)
+#showandtell()
+
+
