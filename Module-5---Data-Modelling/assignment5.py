@@ -2,48 +2,53 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
+import os 
+
+from sklearn.metrics import accuracy_score
 
 matplotlib.style.use('ggplot') # Look Pretty
 
+os.chdir('D:/Data analysis/data/DAT210x/Module5/Datasets')
 
 def plotDecisionBoundary(model, X, y):
-  fig = plt.figure()
-  ax = fig.add_subplot(111)
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
 
-  padding = 0.6
-  resolution = 0.0025
-  colors = ['royalblue','forestgreen','ghostwhite']
+    padding = 0.6    
+    resolution = 0.0025
+    colors = ['royalblue','forestgreen','ghostwhite']
 
-  # Calculate the boundaris
-  x_min, x_max = X[:, 0].min(), X[:, 0].max()
-  y_min, y_max = X[:, 1].min(), X[:, 1].max()
-  x_range = x_max - x_min
-  y_range = y_max - y_min
-  x_min -= x_range * padding
-  y_min -= y_range * padding
-  x_max += x_range * padding
-  y_max += y_range * padding
+    # Calculate the boundaries
+    x_min, x_max = X[:, 0].min(), X[:, 0].max()
+    y_min, y_max = X[:, 1].min(), X[:, 1].max()
+    x_range = x_max - x_min
+    y_range = y_max - y_min
+    x_min -= x_range * padding
+    y_min -= y_range * padding
+    x_max += x_range * padding
+    y_max += y_range * padding
 
-  # Create a 2D Grid Matrix. The values stored in the matrix
-  # are the predictions of the class at at said location
-  xx, yy = np.meshgrid(np.arange(x_min, x_max, resolution),
+    # Create a 2D Grid Matrix. The values stored in the matrix
+    # are the predictions of the class at at said location
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, resolution),
                        np.arange(y_min, y_max, resolution))
 
-  # What class does the classifier say?
-  Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
-  Z = Z.reshape(xx.shape)
+    # What class does the classifier say?
+    Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
+    Z = Z.reshape(xx.shape)
 
-  # Plot the contour map
-  cs = plt.contourf(xx, yy, Z, cmap=plt.cm.terrain)
+    # Plot the contour map
+    cs = plt.contourf(xx, yy, Z, cmap=plt.cm.terrain)
 
-  # Plot the test original points as well...
-  for label in range(len(np.unique(y))):
-    indices = np.where(y == label)
-    plt.scatter(X[indices, 0], X[indices, 1], c=colors[label], label=str(label), alpha=0.8)
+    # Plot the test original points as well...
+    for label in range(len(np.unique(y))):
+        indices = np.where(y == label)
+        plt.scatter(X[indices, 0], X[indices, 1], c=colors[label], label=str(label), alpha=0.8)
 
-  p = model.get_params()
-  plt.axis('tight')
-  plt.title('K = ' + str(p['n_neighbors']))
+    p = model.get_params()
+    plt.axis('tight')
+    plt.title('K = ' + str(p['n_neighbors']))
 
 
 # 
@@ -52,15 +57,17 @@ def plotDecisionBoundary(model, X, y):
 # loading your data properly--don't fail on the 1st step!
 #
 # .. your code here ..
-
-
+X = pd.read_csv('wheat.data') #, index_col = 0)
+X = X.drop(labels = ['id'], axis = 1)
+#print(X.head())
 
 #
 # TODO: Copy the 'wheat_type' series slice out of X, and into a series
 # called 'y'. Then drop the original 'wheat_type' column from the X
 #
 # .. your code here ..
-
+y = X['wheat_type'].copy()
+X.drop('wheat_type', axis = 1, inplace = True)
 
 
 # TODO: Do a quick, "ordinal" conversion of 'y'. In actuality our
@@ -68,13 +75,18 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
+y = y.astype("category")
+y = y.cat.codes
 
 
 #
 # TODO: Basic nan munging. Fill each row's nans with the mean of the feature
 #
 # .. your code here ..
-
+#for feature in X:
+#    X[feature].fillna(X[feature].mean(), inplace = True)
+    #print(X[feature])
+X = X.fillna(X.mean())    
 
 
 #
@@ -84,7 +96,8 @@ def plotDecisionBoundary(model, X, y):
 # specify a random_state.
 #
 # .. your code here ..
-
+from sklearn.cross_validation import train_test_split
+data_train, data_test, label_train, label_test = train_test_split(X, y, test_size = 0.33, random_state = 1)
 
 
 # 
@@ -98,6 +111,9 @@ def plotDecisionBoundary(model, X, y):
 # apply your models to.
 #
 # .. your code here ..
+from sklearn.preprocessing import Normalizer
+data_train_fit = Normalizer().fit(data_train)
+
 
 
 
@@ -110,7 +126,8 @@ def plotDecisionBoundary(model, X, y):
 # feature-space as the original data used to train your models.
 #
 # .. your code here ..
-
+Trans_datatrain = data_train_fit.transform(data_train)
+Trans_datatest = data_train_fit.transform(data_test)
 
 
 
@@ -124,7 +141,12 @@ def plotDecisionBoundary(model, X, y):
 # boundary in 2D would be if your KNN algo ran in 2D as well:
 #
 # .. your code here ..
+from sklearn.decomposition import PCA
+pca = PCA(n_components = 2)
+pca.fit(Trans_datatrain)
 
+X_train = pca.transform(Trans_datatrain)
+X_test = pca.transform(Trans_datatest)
 
 
 
@@ -135,12 +157,14 @@ def plotDecisionBoundary(model, X, y):
 # your labels.
 #
 # .. your code here ..
-
+from sklearn.neighbors import KNeighborsClassifier
+knn = KNeighborsClassifier(n_neighbors = 9)
+knn.fit(X_train, label_train)
 
 
 
 # HINT: Ensure your KNeighbors classifier object from earlier is called 'knn'
-plotDecisionBoundary(knn, X_train, y_train)
+plotDecisionBoundary(knn, X_train, label_train)
 
 
 #------------------------------------
@@ -153,8 +177,10 @@ plotDecisionBoundary(knn, X_train, y_train)
 #
 # .. your code here ..
 
-
-
+predictions = knn.predict(X_test)
+accuracy  = accuracy_score(label_test, predictions)
+print(accuracy)
+print(knn.score(X_test, label_test))
 #
 # BONUS: Instead of the ordinal conversion, try and get this assignment
 # working with a proper Pandas get_dummies for feature encoding. HINT:
