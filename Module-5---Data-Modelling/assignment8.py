@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-
+import os
 matplotlib.style.use('ggplot') # Look Pretty
 
 
@@ -15,9 +15,9 @@ def drawLine(model, X_test, y_test, title):
   ax.scatter(X_test, y_test, c='g', marker='o')
   ax.plot(X_test, model.predict(X_test), color='orange', linewidth=1, alpha=0.7)
 
-  print "Est 2014 " + title + " Life Expectancy: ", model.predict([[2014]])[0]
-  print "Est 2030 " + title + " Life Expectancy: ", model.predict([[2030]])[0]
-  print "Est 2045 " + title + " Life Expectancy: ", model.predict([[2045]])[0]
+  print( "Est 2014 " + title + " Life Expectancy: ", model.predict([[2014]])[0])
+  print( "Est 2030 " + title + " Life Expectancy: ", model.predict([[2030]])[0])
+  print( "Est 2045 " + title + " Life Expectancy: ", model.predict([[2045]])[0])
 
   score = model.score(X_test, y_test)
   title += " R2: " + str(score)
@@ -34,15 +34,17 @@ def drawLine(model, X_test, y_test, title):
 # spread sheet application
 #
 # .. your code here ..
-
-
+os.chdir('D:/Data analysis/data/DAT210x/Module5/Datasets')
+X = pd.read_csv('life_expectancy.csv', sep = '\t', header = 0)
+print(X.head())
 #
 # TODO: Create your linear regression model here and store it in a
 # variable called 'model'. Don't actually train or do anything else
 # with it yet:
 #
 # .. your code here ..
-
+from sklearn.linear_model import LinearRegression
+model = LinearRegression()
 
 
 #
@@ -54,6 +56,14 @@ def drawLine(model, X_test, y_test, title):
 # of this document before proceeding.
 #
 # .. your code here ..
+train = X[X.Year < 1986]
+X_train = train.Year
+y_train = train.WhiteMale
+
+print(type(X_train))
+X_train = X_train.to_frame()         #was a series as mentioned below, so had to covert to dataframe
+y_train = y_train.to_frame()          #was a series as mentioned below, so had to covert to dataframe
+print(type(X_train))
 
 
 
@@ -67,13 +77,15 @@ def drawLine(model, X_test, y_test, title):
 #
 # .. your code here ..
 
+model.fit(X_train, y_train)
+drawLine(model, X_train, y_train, 'WhiteMale')
 
 #
 # TODO: Print the actual 2014 WhiteMale life expectancy from your
 # loaded dataset
 #
 # .. your code here ..
-
+print("Actual WhiteMale life expectancy in 2014 for the loaded dataset is ", X.WhiteMale[X.Year == 2014])
 
 
 # 
@@ -83,7 +95,19 @@ def drawLine(model, X_test, y_test, title):
 # BlackFemale life expectancy
 #
 # .. your code here ..
+train = X[X.Year < 1986]
+X_train = train.Year
+y_train = train.BlackFemale
 
+print(type(X_train))
+X_train = X_train.to_frame()         #was a series as mentioned below, so had to covert to dataframe
+y_train = y_train.to_frame()          #was a series as mentioned below, so had to covert to dataframe
+print(type(X_train))
+
+model.fit(X_train, y_train)
+drawLine(model, X_train, y_train, 'BlackFemale')
+
+print("Actual BlackFemale life expectancy in 2014 for the loaded dataset is ", X.BlackFemale[X.Year == 2014])
 
 
 #
@@ -93,6 +117,17 @@ def drawLine(model, X_test, y_test, title):
 # the course
 #
 # .. your code here ..
+correlation = X.corr()
+print(correlation)
+
+plt.figure()
+plt.imshow(X.corr(), cmap = plt.cm.Blues, interpolation = 'nearest')
+plt.colorbar()
+tick_marks = [i for i in range(len(X.columns))]
+plt.xticks(tick_marks, X.columns, rotation = 'vertical')
+plt.yticks(tick_marks, X.columns)
+plt.tight_layout()
+
 
 plt.show()
 
